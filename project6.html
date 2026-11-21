@@ -1,0 +1,491 @@
+<script>
+    
+let trains = [
+    {
+        id: 101,
+        name: "Rajdhani Express",
+        source: "Hyderabad",
+        destination: "Delhi",
+        time: "06:00 AM",
+        seats: { Sleeper: 50, "3AC": 30, "2AC": 20, "1AC": 10 },
+        fare: { Sleeper: 500, "3AC": 1000, "2AC": 1500, "1AC": 2500 }
+    },
+    {
+        id: 102,
+        name: "Duronto Express",
+        source: "Hyderabad",
+        destination: "Mumbai",
+        time: "08:30 AM",
+        seats: { Sleeper: 40, "3AC": 25, "2AC": 15, "1AC": 8 },
+        fare: { Sleeper: 400, "3AC": 900, "2AC": 1400, "1AC": 2200 }
+    },
+    {
+        id: 103,
+        name: "Chennai Express",
+        source: "Hyderabad",
+        destination: "Chennai",
+        time: "09:00 PM",
+        seats: { Sleeper: 45, "3AC": 25, "2AC": 15, "1AC": 5 },
+        fare: { Sleeper: 350, "3AC": 850, "2AC": 1300, "1AC": 2000 }
+    },
+    {
+        id: 104,
+        name: "Shatabdi Express",
+        source: "Delhi",
+        destination: "Mumbai",
+        time: "07:00 AM",
+        seats: { Sleeper: 30, "3AC": 20, "2AC": 15, "1AC": 8 },
+        fare: { Sleeper: 600, "3AC": 1100, "2AC": 1600, "1AC": 2600 }
+    },
+    {
+        id: 105,
+        name: "Garib Rath",
+        source: "Mumbai",
+        destination: "Delhi",
+        time: "10:00 PM",
+        seats: { Sleeper: 40, "3AC": 25, "2AC": 15, "1AC": 5 },
+        fare: { Sleeper: 450, "3AC": 850, "2AC": 1300, "1AC": 2200 }
+    }
+];
+
+let bookings = [];
+let pnrCounter = 100001;
+
+// 1. SEARCH TRAINS
+function searchTrains() {
+    console.log("\n===== AVAILABLE TRAINS =====");
+
+    trains.forEach(train => {
+        console.log(
+            "ID:", train.id,
+            "| Train:", train.name,
+            "| Source:", train.source,
+            "| Destination:", train.destination,
+            "| Time:", train.time
+        );
+    });
+}
+
+// 2. SELECT SOURCE
+function selectSource() {
+    let source = prompt("Enter Source Station:");
+
+    if (source === null || source.trim() === "") {
+        console.log("Invalid Source Station!");
+        return null;
+    }
+
+    return source.trim();
+}
+
+// 3. SELECT DESTINATION
+function selectDestination() {
+    let destination = prompt("Enter Destination Station:");
+
+    if (destination === null || destination.trim() === "") {
+        console.log("Invalid Destination Station!");
+        return null;
+    }
+
+    return destination.trim();
+}
+
+// 4. FIND AVAILABLE TRAINS
+const findTrains = function(source, destination) {
+    return trains.filter(train =>
+        train.source.toLowerCase() === source.toLowerCase() &&
+        train.destination.toLowerCase() === destination.toLowerCase()
+    );
+};
+
+// 5. CHECK SEAT AVAILABILITY
+function checkAvailability(train, travelClass) {
+    console.log("Available Seats:", train.seats[travelClass]);
+
+    if (train.seats[travelClass] <= 0) {
+        console.log("No Seats Available!");
+        return false;
+    }
+
+    return true;
+}
+
+// 6. SELECT CLASS
+const selectClass = () => {
+    console.log("\n===== AVAILABLE CLASSES =====");
+    console.log("1. Sleeper");
+    console.log("2. 3AC");
+    console.log("3. 2AC");
+    console.log("4. 1AC");
+
+    let choice = prompt("Select Travel Class:");
+
+    let classes = {
+        "1": "Sleeper",
+        "2": "3AC",
+        "3": "2AC",
+        "4": "1AC"
+    };
+
+    if (!classes[choice]) {
+        console.log("Invalid Class Selection!");
+        return null;
+    }
+
+    return classes[choice];
+};
+
+// 7. CALCULATE FARE
+const calculateFare = function(train, travelClass, count) {
+    let totalFare = train.fare[travelClass] * count;
+
+    console.log("\n===== FARE DETAILS =====");
+    console.log("Fare Per Passenger: Rs.", train.fare[travelClass]);
+    console.log("Number Of Passengers:", count);
+    console.log("Total Fare: Rs.", totalFare);
+
+    return totalFare;
+};
+
+// 8. BOOKING CONFIRMATION
+function confirmOrder(amount, method, train, travelClass, count) {
+
+    let pnr = pnrCounter++;
+
+    let booking = {
+        pnr: pnr,
+        trainId: train.id,
+        trainName: train.name,
+        source: train.source,
+        destination: train.destination,
+        travelClass: travelClass,
+        passengers: count,
+        fare: amount,
+        payment: method,
+        status: "Confirmed"
+    };
+
+    bookings.push(booking);
+
+    console.log("\n================================");
+    console.log("   TICKET BOOKED SUCCESSFULLY");
+    console.log("================================");
+
+    console.log("PNR Number:", booking.pnr);
+    console.log("Train ID:", booking.trainId);
+    console.log("Train Name:", booking.trainName);
+    console.log("Source:", booking.source);
+    console.log("Destination:", booking.destination);
+    console.log("Class:", booking.travelClass);
+    console.log("Passengers:", booking.passengers);
+    console.log("Total Fare: Rs.", booking.fare);
+    console.log("Payment Method:", booking.payment);
+    console.log("Booking Status:", booking.status);
+
+    console.log("================================");
+
+    return booking;
+}
+
+// 9. PAYMENT
+function payment(amount, train, travelClass, count, callback) {
+    console.log("\n===== PAYMENT METHODS =====");
+    console.log("1. UPI");
+    console.log("2. Debit Card");
+    console.log("3. Credit Card");
+    console.log("4. Net Banking");
+
+    let choice = prompt("Select Payment Method:");
+
+    let methods = {
+        "1": "UPI",
+        "2": "Debit Card",
+        "3": "Credit Card",
+        "4": "Net Banking"
+    };
+
+    if (!methods[choice]) {
+        console.log("Invalid Payment Method!");
+        return false;
+    }
+
+    console.log("Payment Method:", methods[choice]);
+    console.log("Total Amount: Rs.", amount);
+
+    let confirmation = confirm(
+        "Confirm Payment of Rs." + amount +
+        " using " + methods[choice] + "?"
+    );
+
+    if (!confirmation) {
+        console.log("Payment Cancelled!");
+        return false;
+    }
+
+    console.log("Payment Successful!");
+
+    // Generate PNR after successful payment
+    callback(amount, methods[choice], train, travelClass, count);
+
+    return true;
+}
+
+// 10. BOOK TICKET
+function bookTicket() {
+    console.log("\n===== RAILWAY TICKET BOOKING =====");
+
+    let source = selectSource();
+
+    if (source === null) return;
+
+    let destination = selectDestination();
+
+    if (destination === null) return;
+
+    if (source.toLowerCase() === destination.toLowerCase()) {
+        console.log("Source And Destination Cannot Be Same!");
+        return;
+    }
+
+    let availableTrains = findTrains(source, destination);
+
+    if (availableTrains.length === 0) {
+        console.log("No Trains Available For This Route!");
+        return;
+    }
+
+    console.log("\n===== SEARCH RESULTS =====");
+
+    availableTrains.forEach(train => {
+        console.log(
+            "Train ID:", train.id,
+            "| Train:", train.name,
+            "| Departure:", train.time
+        );
+    });
+
+    let trainInput = prompt("Enter Train ID:");
+
+    if (
+        trainInput === null ||
+        trainInput.trim() === "" ||
+        !/^[0-9]+$/.test(trainInput.trim())
+    ) {
+        console.log("Invalid Train ID!");
+        return;
+    }
+
+    let train = availableTrains.find(t => t.id === Number(trainInput));
+
+    if (!train) {
+        console.log("Train Not Found!");
+        return;
+    }
+
+    let travelClass = selectClass();
+
+    if (travelClass === null) return;
+
+    if (!checkAvailability(train, travelClass)) return;
+
+    let countInput = prompt("Enter Number Of Passengers:");
+
+    if (
+        countInput === null ||
+        countInput.trim() === "" ||
+        !/^[0-9]+$/.test(countInput.trim())
+    ) {
+        console.log("Invalid Passenger Count!");
+        return;
+    }
+
+    let count = Number(countInput);
+
+    if (count <= 0 || count > 6) {
+        console.log("Enter Passengers Between 1 And 6!");
+        return;
+    }
+
+    if (count > train.seats[travelClass]) {
+        console.log("Insufficient Seats Available!");
+        return;
+    }
+
+    let totalFare = calculateFare(train, travelClass, count);
+
+    console.log("\n===== BOOKING SUMMARY =====");
+    console.log("Train:", train.name);
+    console.log("Source:", source);
+    console.log("Destination:", destination);
+    console.log("Class:", travelClass);
+    console.log("Passengers:", count);
+    console.log("Total Fare: Rs.", totalFare);
+
+    let confirmation = confirm("Do You Want To Continue With Booking?");
+
+    if (!confirmation) {
+        console.log("Booking Cancelled!");
+        return;
+    }
+
+    // Complete payment and generate PNR
+    let paymentSuccess = payment(
+        totalFare,
+        train,
+        travelClass,
+        count,
+        confirmOrder
+    );
+
+    if (paymentSuccess) {
+        train.seats[travelClass] -= count;
+    }
+}
+
+// 11. CANCEL TICKET
+function cancelTicket() {
+    console.log("\n===== CANCEL TICKET =====");
+
+    let pnrInput = prompt("Enter PNR Number:");
+
+    if (
+        pnrInput === null ||
+        pnrInput.trim() === "" ||
+        !/^[0-9]+$/.test(pnrInput.trim())
+    ) {
+        console.log("Invalid PNR Number!");
+        return;
+    }
+
+    let pnr = Number(pnrInput);
+
+    let booking = bookings.find(b => b.pnr === pnr);
+
+    if (!booking) {
+        console.log("PNR Number Not Found!");
+        return;
+    }
+
+    if (booking.status === "Cancelled") {
+        console.log("Ticket Already Cancelled!");
+        return;
+    }
+
+    console.log("Train Name:", booking.trainName);
+    console.log("PNR Number:", booking.pnr);
+    console.log("Ticket Status:", booking.status);
+
+    let confirmation = confirm("Are You Sure You Want To Cancel This Ticket?");
+
+    if (!confirmation) {
+        console.log("Ticket Cancellation Stopped!");
+        return;
+    }
+
+    let train = trains.find(t => t.id === booking.trainId);
+
+    if (train) {
+        train.seats[booking.travelClass] += booking.passengers;
+    }
+
+    booking.status = "Cancelled";
+
+    console.log("\n===== TICKET CANCELLED SUCCESSFULLY =====");
+    console.log("PNR Number:", booking.pnr);
+    console.log("Train Name:", booking.trainName);
+    console.log("Refund Amount: Rs.", booking.fare);
+    console.log("Booking Status:", booking.status);
+}
+
+// 12. CHECK PNR STATUS
+function checkPNRStatus() {
+    console.log("\n===== CHECK PNR STATUS =====");
+
+    let pnrInput = prompt("Enter PNR Number:");
+
+    if (
+        pnrInput === null ||
+        pnrInput.trim() === "" ||
+        !/^[0-9]+$/.test(pnrInput.trim())
+    ) {
+        console.log("Invalid PNR Number!");
+        return;
+    }
+
+    let pnr = Number(pnrInput);
+
+    let booking = bookings.find(b => b.pnr === pnr);
+
+    if (!booking) {
+        console.log("PNR Number Not Found!");
+        return;
+    }
+
+    console.log("\n===== PNR DETAILS =====");
+    console.log("PNR Number:", booking.pnr);
+    console.log("Train Name:", booking.trainName);
+    console.log("Source:", booking.source);
+    console.log("Destination:", booking.destination);
+    console.log("Travel Class:", booking.travelClass);
+    console.log("Passengers:", booking.passengers);
+    console.log("Total Fare: Rs.", booking.fare);
+    console.log("Payment Method:", booking.payment);
+    console.log("Ticket Status:", booking.status);
+}
+
+// 13. MAIN APPLICATION
+function railwayApplication() {
+    let choice;
+
+    do {
+        let input = prompt(
+            "===== RAILWAY TICKET BOOKING APPLICATION =====\n" +
+            "1. Search Trains\n" +
+            "2. Book Ticket\n" +
+            "3. Cancel Ticket\n" +
+            "4. Check PNR Status\n" +
+            "5. Exit\n\n" +
+            "Enter Your Choice:"
+        );
+
+        if (input === null) {
+            console.log("Thank You For Using Railway Booking!");
+            break;
+        }
+
+        if (input.trim() === "" || !/^[1-5]$/.test(input.trim())) {
+            console.log("Invalid Choice! Please Select 1 To 5.");
+            continue;
+        }
+
+        choice = Number(input);
+
+        switch (choice) {
+            case 1:
+                searchTrains();
+                break;
+
+            case 2:
+                bookTicket();
+                break;
+
+            case 3:
+                cancelTicket();
+                break;
+
+            case 4:
+                checkPNRStatus();
+                break;
+
+            case 5:
+                console.log("Thank You For Using Railway Booking!");
+                break;
+        }
+
+    } while (choice !== 5);
+}
+
+// START APPLICATION
+railwayApplication();
+
+</script>
